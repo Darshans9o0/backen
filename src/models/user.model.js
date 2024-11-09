@@ -60,7 +60,7 @@ userSchema.pre("save" , async  function (next) {
         return next()
 
     }
-    this.pasword = bcrypt.hash(this.pasword,10)
+    this.pasword =  await bcrypt.hash(this.pasword,10)
     next()
 })
 
