@@ -7,7 +7,7 @@ import {upload} from "../middlewares/multer.middleware.js";
  router.route("/register").post(
    upload.fields([
       {
-            name : "avtar",
+            name : "avatar",
             maxCount : 1     
         },
         {
