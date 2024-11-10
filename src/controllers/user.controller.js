@@ -36,14 +36,19 @@ const registerUser = asynchandle( async (req, res ) => {
       }
       console.log(req.files)
        const avatarLocalPath = req.files?.avatar[0]?.path;
-       const imageLocalPath = req.files?.coverImage[0]?.path;
+      // const imageLocalPath = req.files?.coverImage[0]?.path;
 
-       if(!avatarLocalPath){
+      let coverImageLocalPath;
+      if(req.files && Array.isArray(req.files.coverImage)  && req.files.coverImage.length > 0){
+        coverImageLocalPath = req.files.coverImage[0].path;
+      } 
+
+       if(!avatarLocalPath){ 
         throw new apierror(400 , "Avatar file  is required ")
 
        }
     const avatar = await uploadOncloudnary(avatarLocalPath) 
-    const image = await uploadOncloudnary(imageLocalPath) 
+   const coverImage = await uploadOncloudnary(coverImageLocalPath) 
     // shold be checked if pt db will be blasted
 
     if (!avatar) {
@@ -56,12 +61,12 @@ const registerUser = asynchandle( async (req, res ) => {
       coverImage : coverImage?.url || "",
       email,
       pasword,
-      username : username.toLowerCase()
+    username : username.toLowerCase()
     })
 
-   const createdUser =  await User.findById(user._id).select(
+   const createdUser =  await User.findById(user._id).select([
     "-pasword  -  refreshToken " 
-   )
+   ])
 
    if (!createdUser) {
     throw new apierror(500,"Somthing went wrong while regestering the user ")    
