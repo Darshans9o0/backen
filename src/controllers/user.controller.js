@@ -1,11 +1,31 @@
-import {  asynchandle} from "../utils/async.js";
+import { asyncHandler } from "../utils/asyncHandler.js"
 import {apierror} from "../utils/apierror.js"
 import {User} from "../models/user.model.js"
 import {uploadOncloudnary} from "../utils/fileUpload.js"
 import {apirsponse} from "../utils/apiResponse.js"
 
+const genrateAccesAndrefreshToken = async(userId)  =>{
+  try {
+  // get user info from db
+  const user =   await User.findById(userId)
+  // generate token for session
+ const accesToken =  await user.generateAccesToken()
 
-const registerUser = asynchandle( async (req, res ) => {
+ const refreshToken =  await user.generateRefreshToken()
+ console.log('refresh token', refreshToken)
+          
+   user.refreshToken = refreshToken
+  await user.save({validateBeforeSave : false})
+
+  return {accesToken , refreshToken}
+   
+  } catch (error) {console
+    throw new apierror (500 , "something wennt wrong")
+  }
+}
+
+
+const registerUser = asyncHandler( async (req, res ) => {
     // get user details from fontend 
     // validation - not empty 
     // check if user alredy exits  check hrough username nd email
@@ -75,12 +95,90 @@ const registerUser = asynchandle( async (req, res ) => {
    return res.status(201).json(
     new apirsponse(200 , createdUser , "User registered Succesfully")
    )
+   
+  })
+
+   const loginUser = asyncHandler (async (req , res) => {
+    // req body take data 
+    // username or email  logn
+    // find thr user
+    // passwrd check 
+    // acces nd refresh token 
+    // snd cookie 
+    // sned response 
+    
+    const {username , email , pasword} = req.body
+
+    
+    
+    if(!username && !email){
+      throw new apierror(400 , "username or email is reqired ")
+    }
+
+    const user = await User.findOne({
+      $or : [{username} , {email}]
+    })
+     if (!user){
+      throw new apierror (404 , "user doesnt exists")
+     }
+     console.log('passowrd ',pasword)
+   const isPasswordValid =   await user.isPasswodCorrect(pasword)
+   console.log(isPasswordValid);
+   
+
+   if (!isPasswordValid){
+    throw new apierror (401 , "Inavalid password ")
+   }
+  const {accesToken, refreshToken} =   await  genrateAccesAndrefreshToken(user._id)
 
 
 
+     const loggedUser = User.findById(user._id).select(" -pasword  -refreshToken")
+     
 
+     const options = {    // cookis
+      httpOnly : true,
+      secure : true
+     }
+     return res
+     .status(200)
+     .cookie("accesToken" , accesToken , options)
+     .cookie("refreshToken" , refreshToken , options)
+     .json(
+      new apirsponse(
+        200,
+        {
+          user : loggedUser , accesToken , refreshToken
+        },
+        "User logged succesfully"
+      )
+     )
+    })
+
+    const logoutUser = asyncHandler(async (req ,res) => {
+   await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set  : {
+        refreshToken : undefined
+        } 
+      },
+        {
+          new : true
+        },
+      
+    )
+    const options = {    // cookis
+      httpOnly : true,
+      secure : true
+     }
+     return res
+     .status(200)
+     .clearCookie("accesToken" ,options)
+     .clearCookie("refreshToken" ,options)
+     .json(new apirsponse(200 , {} ,"User loggout"))
     })
 
 
 
-export {registerUser}
+export {registerUser , loginUser , logoutUser}

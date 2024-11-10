@@ -55,32 +55,38 @@ const userSchema = new Schema(
 
 )
 
-userSchema.pre("save" , async  function (next) {
+userSchema.pre("save" , async  function (next) {console.log("withing presave")
     if(!this.isModified("password")){
+        // used for save function
+        this.pasword =  await bcrypt.hash(this.pasword,10)       
         return next()
 
     }
-    this.pasword =  await bcrypt.hash(this.pasword,10)
+   
     next()
 })
 
-userSchema.methods.isPasswodCorrect = async function (password){
-    return await bcrypt.compare(password , this.password)
+userSchema.methods.isPasswodCorrect = async function (pasword){
+    return await bcrypt.compare(pasword , this.pasword)
 }
 
-userSchema.methods.generateAccesToken = function(){
-   return jwt.sign(
-    {
-        _id: this._id,
-        email: this.email,
-        username: this.username,
-        fullname: this.fullname
-    },
-    process.env.ACCES_TOKEN_SECRET,
-    {
-        exipresIn : process.env.ACCES_TOKEN_EXPIRY
-    }
- )
+userSchema.methods.generateAccesToken = async function(){
+   
+ 
+    const token =await jwt.sign(
+        {
+            _id: this._id,
+            email: this.email,
+            username: this.username,
+            fullname: this.fullname
+        },
+        process.env.ACCES_TOKEN_SECRET,
+        {
+            expiresIn : process.env.ACCES_TOKEN_EXPIRY
+        }
+     )
+    
+   return token;
 }
 userSchema.methods.generateRefreshToken = function(){
     return jwt.sign(
@@ -90,7 +96,7 @@ userSchema.methods.generateRefreshToken = function(){
         },
         process.env.REFRESF_TOKEN_SECRET,
         {
-            exipresIn : process.env.REFRESF_TOKEN_EXPIRY 
+            expiresIn : process.env.REFRESF_TOKEN_EXPIRY 
         }
      )
 
