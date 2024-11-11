@@ -133,7 +133,7 @@ const registerUser = asyncHandler( async (req, res ) => {
 
 
 
-     const loggedUser = User.findById(user._id).select(" -pasword  -refreshToken")
+  const loggedUser = User.findById(user._id).select(" -pasword  -refreshToken")
      
 
      const options = {    // cookis
@@ -142,19 +142,20 @@ const registerUser = asyncHandler( async (req, res ) => {
      }
      return res
      .status(200)
-     .cookie("accesToken" , accesToken , options)
-     .cookie("refreshToken" , refreshToken , options)
+     .cookie("accesToken", accesToken, options)
+     .cookie("refreshToken", refreshToken, options)
      .json(
-      new apirsponse(
-        200,
-        {
-          user : loggedUser , accesToken , refreshToken
-        },
-        "User logged succesfully"
-      )
-     )
-    })
-
+       new apirsponse(
+         200,
+         {
+           user: { username: user.username, email: user.email },
+           accesToken,
+           refreshToken,
+         },
+         "User logged succesfully"
+       )
+     );
+ });
     const logoutUser = asyncHandler(async (req ,res) => {
    await User.findByIdAndUpdate(
       req.user._id,

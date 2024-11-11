@@ -56,7 +56,8 @@ const userSchema = new Schema(
 )
 
 userSchema.pre("save" , async  function (next) {console.log("withing presave")
-    if(!this.isModified("password")){
+ 
+if (this.isNew || this.isModified("pasword")) {
         // used for save function
         this.pasword =  await bcrypt.hash(this.pasword,10)       
         return next()
@@ -73,7 +74,7 @@ userSchema.methods.isPasswodCorrect = async function (pasword){
 userSchema.methods.generateAccesToken = async function(){
    
  
-    const token =await jwt.sign(
+    const token = await jwt.sign(
         {
             _id: this._id,
             email: this.email,
