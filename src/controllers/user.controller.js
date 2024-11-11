@@ -223,6 +223,28 @@ const registerUser = asyncHandler( async (req, res ) => {
       }
     })
 
+    const changeCurrentPasswod = asyncHandler(async(req,res) => {
+      const {oldPasword , newPasword} = req.body
+
+      const user = await User.findById(req.user?.id)
+       await  isPasswodCorrect = user.isPasswodCorrect(oldPasword)
+
+       if(!isPasswodCorrect){
+        throw new apierror (401 "Invalid Old password")
+
+       }
+       user.pasword = newPasword 
+       await user.save({validateBeforeSave : false})
+
+       return res.status(200)
+       .json(new apierror(200 , {} , "passowrd changed succesfully "))
+    })
+
+  const getCurrentUser = asyncHandler(async (req , res)=> {
+    return res.status(200)
+    .json(200 , req.user , "Current user fetched Succesfully")
+  })
 
 
-export {registerUser , loginUser , logoutUser , refreshAccessToken }
+
+export {registerUser , loginUser , logoutUser , refreshAccessToken , changeCurrentPasswod , getCurrentUser }
