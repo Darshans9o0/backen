@@ -3,7 +3,7 @@ import {apierror} from "../utils/apierror.js"
 import {User} from "../models/user.model.js"
 import {uploadOncloudnary} from "../utils/fileUpload.js"
 import {apirsponse} from "../utils/apiResponse.js"
-import {jwt} from "jsonwebtoken"
+import jwt from "jsonwebtoken"
 
 const genrateAccesAndrefreshToken = async(userId)  =>{
   try {
@@ -205,7 +205,7 @@ const registerUser = asyncHandler( async (req, res ) => {
           secure : true
         }
   
-        const {accesToken , newrefreshToken}  = await genrateAccesAndrefreshToken(user._id)
+         const {accesToken , newrefreshToken}  = await genrateAccesAndrefreshToken(user._id)
   
          return res
          .status(200)
@@ -226,11 +226,11 @@ const registerUser = asyncHandler( async (req, res ) => {
     const changeCurrentPasswod = asyncHandler(async(req,res) => {
       const {oldPasword , newPasword} = req.body
 
-      const user = await User.findById(req.user?.id)
-       await  isPasswodCorrect = user.isPasswodCorrect(oldPasword)
+      const user = await User.findById(req.user?._id)
+     const isPasswodCorrect =  await   user.isPasswodCorrect(oldPasword)
 
        if(!isPasswodCorrect){
-        throw new apierror (401 "Invalid Old password")
+        throw new apierror (401  , "Invalid Old password")
 
        }
        user.pasword = newPasword 
@@ -245,6 +245,83 @@ const registerUser = asyncHandler( async (req, res ) => {
     .json(200 , req.user , "Current user fetched Succesfully")
   })
 
+  const updateAccountDetails = asyncHandler (async (req, res) => {
+    const {fullname , username , email} = req.body
+
+    if(!fullname || !email || !username){
+      throw new apierror(400 , "all these are required")
+
+    }
+     const user = User.findByIdAndUpdate(req.user?._id ,
+      {
+        $set : {
+          fullname,
+          email , 
+          username : username
+        }
+      },
+      {new : true}
+    ).select("-pasword")
+
+    return res.status(200)
+    .json(new apierror(200 , user , "details upadeted succesfully"))
+  })
+
+  const updateUserAvatar = asyncHandler(async(req , res) => {
+   const avatarLocalPath =  req.file?.path
+
+   if(!avatarLocalPath){
+     throw new apierror(400 , "Avatar file is missing")
+   }
+   const avatar = await uploadOncloudnary(avatarLocalPath)
+   if(!avatar.url){
+    throw new apierror(400 , "Error while uploading on avatar")
+   }
+   await User.findByIdAndUpdate(
+    req.user?.id,
+    { $set : {
+      avatar : avatar.url
+    }
+  },
+    {new : true}
+   ).select("-pasword")
+   return res.status(200)
+   .json( new apierror (200 , user , "avatar updated succesfullu"))
+
+  })
+  const updateUserCoverImage = asyncHandler(async(req , res) => {
+    const coverImageLocalPath =  req.file?.path
+ 
+    if(!coverImageLocalPath){
+      throw new apierror(400 , "coverimage file is missing")
+    }
+    const coverImage = await uploadOncloudnary(coverImageLocalPath)
+    if(!coverImage.url){
+     throw new apierror(400 , "Error while uploading on coverimage")
+    }
+     const user = await User.findByIdAndUpdate(
+     req.user?.id,
+     { $set : {
+      coverImage : coverImage.url
+     }
+   },
+     {new : true}
+    ).select("-pasword")
+    return res.status(200)
+    .json( new apierror (200 , user , "cover image updated succesfullu"))
+ 
+   })
 
 
-export {registerUser , loginUser , logoutUser , refreshAccessToken , changeCurrentPasswod , getCurrentUser }
+
+
+export {registerUser , 
+  loginUser , 
+  logoutUser , 
+  refreshAccessToken , 
+  changeCurrentPasswod ,
+   getCurrentUser ,
+  updateAccountDetails,
+  updateUserAvatar,
+  updateUserCoverImage
+  }
