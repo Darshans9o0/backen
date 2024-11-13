@@ -5,14 +5,18 @@ import {User} from "../models/user.model.js"
 
 export const verifyJwt = asyncHandler(async(req, res , next) => {
 try {
-      const token =   req.cookies.accesToken || req.header("Authorization")?.replace("Bearer ","")
+   // console.log("req" , req.cookies , req.header); 
+  console.log("Cookies received:", req.cookies); // Debug cookies
+    console.log("Authorization header:", req.header("Authorization"));
+  
+      const token =   req.cookies?.accesToken || req.header("Authorization")?.replace("Bearer ","")
     
       if(!token){
-        throw new apierror (401 , "unthorized request")
+        throw new apierror (401 , "unauthorized request")
       }
        const decoded = jwt.verify(token ,process.env.ACCES_TOKEN_SECRET)
     
-      const user =  await User.findById(decoded ?._id).select(" -pasword -refreshToken")
+      const user =  await User.findById(decoded ._id).select(" -pasword -refreshToken")
     
       if(!user){
         // todo Frontend
@@ -20,8 +24,8 @@ try {
       }
     
       req.user = user;
-      next()
+      next();
 } catch (error) {
-    throw new apierror (401 , error?.message || "Invalid   acces token")
+    throw new apierror (401 , error.message || "Invalid   acces token")
 }
 })

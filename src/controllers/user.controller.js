@@ -162,8 +162,8 @@ const registerUser = asyncHandler( async (req, res ) => {
    await User.findByIdAndUpdate(
       req.user._id,
       {
-        $set  : {
-        refreshToken : undefined
+        $unset  : {
+        refreshToken : 1
         } 
       },
         {
@@ -184,6 +184,9 @@ const registerUser = asyncHandler( async (req, res ) => {
 
     const refreshAccessToken = asyncHandler(async (req , res ) =>{
        const incomingRefreshToken  = req.cookies.refreshToken || req.body.refreshToken
+
+       console.log( "htt is" ,  req.cookies.refreshToken);
+       
 
        if(!incomingRefreshToken){
         throw new apierror(401 , "Unauthorised request")
@@ -287,7 +290,7 @@ const registerUser = asyncHandler( async (req, res ) => {
     {new : true}
    ).select("-pasword")
    return res.status(200)
-   .json( new apierror (200 , user , "avatar updated succesfullu"))
+   .json( new apierror (200 , User , "avatar updated succesfullu"))
 
   }) // delelte the old image save it in a var
   const updateUserCoverImage = asyncHandler(async(req , res) => {
