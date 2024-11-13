@@ -29,8 +29,8 @@ router.route("/login").post( loginUser);
 router.route("/logout").post( verifyJwt , logoutUser) // yes 
 router.route("/refresh-token").post(refreshAccessToken) // yes
 router.route("/change-password").post(verifyJwt , changeCurrentPasswod)
-router.route("/current-user").get(verifyJwt , getCurrentUser) // worked
-router.route("/update-details").patch(verifyJwt , updateAccountDetails) 
+router.route("/current-user").get(verifyJwt , getCurrentUser) // worke
+router.route("/update-details").patch(verifyJwt , updateAccountDetails)
 router.route("/avatar").patch(verifyJwt , upload.single("avatar"),updateUserAvatar)
 router.route("/cover-image").patch(verifyJwt , upload.single("coverIamge"),updateUserCoverImage)
 router.route("/c/:username").get(verifyJwt , getUserChannelProfile) // no
