@@ -450,7 +450,9 @@ export {registerUser ,
   refreshAccessToken , 
   changeCurrentPasswod ,
    getCurrentUser ,
+   getUserChannelProfile,
   updateAccountDetails,
   updateUserAvatar,
-  updateUserCoverImage
+  updateUserCoverImage,
+  getWtachHistory
   }
