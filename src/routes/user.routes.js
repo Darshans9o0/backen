@@ -27,3 +27,6 @@ router.route("/login").post( loginUser);
 router.route("/logout").post( verifyJwt , logoutUser)
 router.route("/refresh-token").post(refreshAccessToken)
  export default router
+
+// /// fdsfsdfsddsfsdfsdfsdfsdpre/ 
+// global config for prettier
